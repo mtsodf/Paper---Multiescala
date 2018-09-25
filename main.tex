@@ -1,0 +1,98 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\title{Método multiescala aplicado à problemas de geomecânica}
+\author{Mateus Figueiredo}
+\date{August 2018}
+
+\usepackage{natbib}
+\usepackage{graphicx}
+
+\begin{document}
+
+\maketitle
+
+\section{Introdução}
+
+
+\begin{figure}[h!]
+\centering
+\includegraphics[scale=1.7]{universe}
+\caption{The Universe}
+\label{fig:universe}
+\end{figure}
+
+\section{Discretização e Elementos Finitos \label{ch:discretizacao}}
+
+
+\section{Método Multiescala}
+
+\subsection{Construção do Operador Grosso}
+
+Nessa seção é apresentado a construção de um operador multiescala para aplicação em um problema de elementos finitos. A construção desse tipo de operador tem diversas aplicações para a solução dos sistemas lineares apresentados advindos da discretização de equações diferenciais. Ele consiste basicamente em construir um operador grosso através do cálculo de funções de base em um grid gerado pelo acoplamento de elementos do grid fino. Pode ser utilizado como pré-condicionador \cite{casteletto}, como solver multinível semelhante aos solver multigrid ou ainda como aproximação para a solução original do problema. Os métodos multiescala tem sido aplicados com sucesso para problemas elípticos que é o caso do problema da elasticidade linear aqui apresentado. As vantagens do método apresentadas em \cite{thomashou} são que a funções de base multiescala tentam se adaptar as propriedades locais do operador de forma que o operador grosso as conserve, e também podem ser construídas através da solução de problemas independentes e, portanto, em paralelo.
+
+O primeiro passo para a construção do operador multiescala é gerar um novo grid com menos elementos que o grid original do problema (grid fino) que ainda representa o mesmo domínio $\Omega$. Esse grid novo será chamado de grid grosso e as variáveis relacionadas com ele serão assinadas com o sobre-escrito $H$. 
+Assim, o grid grosso possui um conjunto $\tau_H$ de elementos onde cada elemento será uma aglomeração de elementos do grid fino. Por exemplo, a figura \ref{fig:gridgrosso} apresenta um grid grosso 3x3 construído a partir de um grid fino 7x7. É importante perceber que não existe a necessidade de aglomerar a mesma quantidade de elementos para se gerar o grid grosso já que existem elementos formados por 9, 6 e 4 elementos do grid fino. Marcados de quadrados azuis estão mostrados os nós que pertencem ao grid grosso e grid fino.
+
+\begin{figure}[!htbp]
+\label{fig:gridgrosso}
+\centering
+\includegraphics[width=6cm]{figs/grosso.png}
+\caption{Exemplo de grid fino 7x7 e um grid grosso 3x3. O elemento inferior esquerdo é composto por 9 elementos do grid fino enquanto o elemento superior direito é composto com 4 elementos do grid fino.}
+\end{figure}
+
+
+Na seção\ref{ch:discretizacao} foi apresentada a discretização através de elementos finitos para o problema de elasticidade linear através do método dos elementos finitos. A notação utilizada é baseada na utilizada em \cite{mbuck}. Assim, como no método dos elementos finitos em que se deseja aproximar a função em um espaço $V^h$ formado por funções de base chapéu no domínio $\Omega$ do problema, a ideia agora é encontrar a solução do problema em um espaço grosso $V^{H}$, tal que $V^{H} \subset V^h$. 
+
+
+
+Para definir melhor esse espaço $V^{H}$ precisamos definir as suas funções de base geradoras dele assim como foram definidas para $V^h$.  Novamente, para distinguir o nó pertencente ao grid grosso dos seus graus de liberdade o seguinte conjunto com graus de liberdade é criado.
+
+
+\begin{equation}
+    D^H = \{ p^{(m)} \in D^h : x^p \in \Sigma_H, m=1,2\}
+\end{equation}
+Onde, \(\Sigma_H\) representa o conjunto de nós do grid grosso e \(D^h\) os graus de liberdade do grid fino. Além disso, deve-se considerar o conjunto
+
+\begin{equation}
+    S_p = \{T \in \tau_H : x^p \in T\}
+\end{equation}que representa os elementos grossos relacionados ao nó grosso $x^p $. A nova solução encontrada no grid grosso será uma combinação linear das funções de base $\phi_{j{(k)}}^H : \mathbb{R}^2 \mapsto \mathbb{R}^2 $  .
+\begin{equation}
+u^H = 
+\begin{bmatrix}
+u^H_x
+\\ 
+u^H_y
+\end{bmatrix}
+= \sum_{j=1}^{n_P} u_{j^{(k)}} \phi^H_{j^{(k)}}
+\end{equation}
+
+Onde essas funções de de base do grid grosso são calculadas resolvendo problemas locais de modo que elas possuam informação do operador original e $\phi^H_{p^{(k)}}$  possui suporte em $S_p$.  Um representação do $S_p$ é apresentada em figura ???.
+
+
+
+
+Como apresentado em \cite{casteletto}, os problema locais para o cálculo de cada função de base é  composto pelas equações apresentadas em \ref{eq:problemalocal}. 
+
+\begin{equation} \label{eq:problemalocal}
+\left\{\begin{matrix}
+\nabla \cdotp (C:\nabla ^ S \phi^H_{j^{(k)}}) = \mathbf{0}, \text{   em  } T
+\\ 
+\nabla_{||} \cdotp (C:\nabla_{||} ^ S \phi^H_{j^{(k)}}) = \mathbf{0}, \text{  em   } \partial T
+\\ 
+\phi^H_{j^{(k)}} = \delta_{jp} e_k, \text{    em   } x^p \in \Sigma ^ H
+\end{matrix}\right.
+\end{equation}onde $e_k$ representa um vetor com o valor igual a 1 na posição k, ou seja, no caso de duas dimensões $e_0 = [1, 0]^T$ e $e_1  = [0, 1]^T$ e $T \in S_j$ . No caso de 2 dimensões com elementos quadriláteros, cada função de base será calculada através da solução de 4 problemas locais pois cada nó pertence a quatro elementos diferentes. 
+
+
+
+
+\section{Resultados}
+
+
+\section{Conclusão}
+``I always thought something was fundamentally wrong with the universe'' \citep{adams1995hitchhiker}
+
+\bibliographystyle{plain}
+\bibliography{references}
+\end{document}
